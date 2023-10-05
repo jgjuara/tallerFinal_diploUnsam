@@ -111,7 +111,7 @@ class: inverse
 
 
 ---
-class: inverse, middle
+class: inverse
 
 # bibliografía de referencia
 
@@ -119,6 +119,14 @@ class: inverse, middle
 - 2. [Manual de R](https://fhernanb.github.io/Manual-de-R/)
 - 3. [Ciencia de Datos para Gente Sociable](https://bitsandbricks.github.io/ciencia_de_datos_gente_sociable/)
 - 4. [Introduccion a la ciencia de datos](https://rafalab.dfci.harvard.edu/dslibro/)
+
+# objetivo del taller
+
+- En grupos de a 3 personas van a elaborar un breve informe de estadísticas del turismo similar a algunos de los reportes publicados por la Dirección Nacional de Mercados y Estadísticas: https://tableros.yvera.tur.ar/ 
+
+- Pueden elegir una fuente de datos de su preferencia si tienen un proyecto planteado con anterioridad, sino se les asignará qué fuente de datos usar y el modelo de informe en función de ello.
+
+- Pueden escribirme a por el campus o al correo: juangabrieljuara@gmail.com
 
 ---
 
@@ -330,3 +338,16 @@ Una vez instalado el paquete no es necesario reinstalarlo cada vez que querramos
 ```
 library(tidyverse)
 ```
+
+---
+
+# PARA LA PROXIMA CLASE
+
+- 1) Conformar grupos de a 3 para el taller, ver excel para anotarse en:
+https://docs.google.com/spreadsheets/d/1YpQLTR94IiUhqlBvKNJUTFotLoi5plJ1FziSVuM6LQE/edit?usp=sharing
+
+- 2) Definir si tiene un conjunto de datos pensado o quieren que se les asigne uno
+
+- 2) Instalar R, Rstudio, Rtools y tidyverse
+
+- 3) Repasar Modulo 1 dictado por Fede y las primeras clases, tratar de replicar lo visto
