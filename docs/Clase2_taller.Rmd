@@ -1,0 +1,154 @@
+---
+title: "Taller de Trabajo Final"
+subtitle: ""
+author: "Juan Gabriel Juara"
+institute: "UNSAM - Diplomatura en Generación y Análisis de Información en Turismo"
+date: "12/10/2023"
+output:
+  xaringan::moon_reader:
+    css: ["footer-header.css", "styles.css"]
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      highlightSpans: true
+      countIncrementalSlides: false
+---
+
+layout: true
+
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(collapse = TRUE,
+                      fig.retina = 3,
+                      cache = TRUE, echo = F,
+                      warning = FALSE,
+                      message = FALSE)
+```
+
+
+```{r xaringan, include=FALSE}
+xaringanExtra::use_xaringan_extra(c("tile_view", "animate_css", "tachyons", "extra_styles", "scribble", "editable", "broadcast", "webcam"))
+```
+
+```{r extrasXaringan, echo=FALSE}
+xaringanExtra::use_extra_styles(
+  hover_code_line = TRUE,         #<<
+)
+xaringanExtra::use_progress_bar(color = "#00a6a9", location = "top")
+```
+
+---
+
+# ABC para ordenar el TP
+
+### 1) Elegir la fuente de datos adecuada
+
+---
+
+
+## NO
+```{r,  fig.width=14}
+knitr::include_graphics(here::here("docs", "ipc_indec.png"))
+```
+
+## SI
+```{r,  fig.width=14}
+knitr::include_graphics(here::here("docs", "ipc_datoabierto.png"))
+```
+
+---
+
+# ABC para el proyecto
+
+### 1) Elegir la fuente de datos adecuada `(si no tienen propuesta se les asigna una para el 19/10)`
+
+### 2) Definir un índice de los productos a realizar
+
+---
+
+# Índice de productos.
+
+## Debe indicar qué indicadores y en función del cruce de cuáles variables se obtienen
+
+## Debe indicar como se presentan esos datos
+
+### Por ej.: 
+
+- 1) Tabla estadía promedio por región y por trimestre: se obtiene a partir del cociente entre pernoctes y turistas según región de destino y agrupando trimestralmente
+
+- 2) Gráfico de pernoctes totales para una región seleccionada por mes: se obtiene sumando el valor de pernoctes filtrando por región de interés por mes. Se representa como una gráfico de líneas y puntos (eje x tiempo, eje y pernoctes) 
+
+- 3) Gráfico de porcentaje de turistas de una región respecto al total nacional por mes: se obtiene a partir del cociente entre turistas de región y turistas total nacional por mes expresado como porcentaje. Se representa como un gráfico de columna (eje x tiempo, eje y porcentaje)
+
+---
+
+# ABC para el proyecto
+
+### 1) Elegir la fuente de datos adecuada `(si no tienen propuesta se les asigna una para el 19/10)`
+
+### 2) Definir un índice de los productos a realizar  `(se les va a asignar en función de los datos elegidos)`
+
+### 3) Escribir una hoja de ruta con los pasos a realizar para llegar de los datos crudos al producto
+
+---
+
+# HOJA DE RUTA
+
+## Debe responder a lo siguiente
+
+## 1) ¿Los datos están limpios o hay casos anómalos o incompletos?
+
+## 2) ¿Los datos vienen en un formato adecuado en cuanto al tipo de datos de cada columna o la estructura de la tabla?
+
+## 3) ¿Requiere crear nuevas columnas calculas a partir de las anteriores? ¿Cuáles? ¿Cómo se realiza el cálculo?
+
+---
+
+juangabrieljuara@gmail.com
+
+---
+
+# REPASO
+
+---
+
+# ASIGNAR
+
+### `nombreObjeto <- "dato"`
+### nombreObjeto es el símbolo que debemos invocar para obtener "dato"
+### `<-`  es el operador de asignación
+### "dato" es el valor asignado a ese símbolo
+
+--
+
+### Asignar _darle_ valores o datos o una definición de función a un símbolo
+### Es importante para poder reusar ese dato y poder ir guardando las modificaciones que le hagamos
+
+---
+# FUNCIONES
+
+## `nombredefuncion(inputs)`
+
+## En general todas las funciones se invocan con su nombre seguidas de paréntesis
+## dentro de los paréntesis van los inputs o valores de parámetros para ejecutar la función
+## podemos ver su documentación usando: `?nombredefuncion()`, por ej.: `?mean()`
+
+---
+
+# LECTURA DE ARCHIVOS
+
+## En general todas las funciones `read_algo()`:
+- `readr::read_csv()`: para leer csv
+- `readr::read_rds()`: para leer rds
+- `readxl::read_excel()`: para leer excels! (paquete nuevo `readxl`)
+- `haven::read_sav()`: para leer archivos sav de spss! (paquete nuevo `haven`)
+
+
+---
+
+# A LOS SCRIPTS
+
+
+

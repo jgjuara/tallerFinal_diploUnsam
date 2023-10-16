@@ -1,0 +1,258 @@
+---
+title: "Sector hotelero"
+description: "Resumen de los últimos datos de la Encuesta de Ocupación Hotelera (EOH), operativo conjunto entre el Instituto Nacional de Estadística y Censos (INDEC) y el Ministerio de Turismo y Deportes (MINTURDEP), que releva información de los establecimientos hoteleros y parahoteleros de 49 localidades del país."
+output: pdf_document
+---
+
+`r strftime(Sys.Date(), format = '%d de %B de %Y')`
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = F, message = F, warning = F, 
+                      fig.align = 'left', fig.width = 12)
+
+options(scipen = 999)
+
+
+library(gt) # Easily Create Presentation-Ready Display Tables, CRAN v0.2.2
+library(tidyverse) # Easily Install and Load the 'Tidyverse', CRAN v1.3.0
+library(lubridate) # Make Dealing with Dates a Little Easier, CRAN v1.7.9
+library(glue)
+library(readxl)
+library(janitor)
+
+
+Sys.setlocale(locale = "es_AR.UTF-8")
+```
+
+```{r}
+
+# Definir mes / trimestre / año de referencia para títulos ----
+fecha <- as.Date("2023-07-01")
+mes <- "Julio"
+#trimestre <- "2do"
+anio <- "2023"
+
+# PALETAS Y FUENTES
+# Paleta colores Presidencia
+cols_arg <- "#37BBED" # Celeste Institucional
+
+#Secundarios
+cols_arg2 <- c("#EE3D8F", # "ROJO"
+               "#50B8B1", # "VERDE"
+               "#F7941E","#FFD100","#D7DF23", "#9283BE")
+
+
+
+```
+
+```{r}
+#Importo datos
+pernoctes_residencia <- read_csv("http://datos.yvera.gob.ar/dataset/93db331e-6970-4d74-8589-c1223ac9c282/resource/86098160-840e-4191-a0fc-b3923bf2b0b0/download/pernoctes-residentes-y-no-residentes.csv")
+
+viajeros_residencia <- read_csv("http://datos.yvera.gob.ar/dataset/93db331e-6970-4d74-8589-c1223ac9c282/resource/d1624c27-4b0d-4b73-b0f8-e7db5c56386f/download/viajeros-hospedados-residentes-y-no-residentes.csv")
+
+eoh <- pernoctes_residencia %>% 
+  rename(origen = origen_pernoctes) %>% 
+  left_join(viajeros_residencia %>% rename(origen = origen_viajeros)) %>% 
+  filter(year(indice_tiempo) >= 2016) %>% 
+  mutate(pernoctes = case_when(
+      indice_tiempo %in% c(as.Date("2020-04-01"), as.Date("2020-05-01")) & anio == 2021 ~ NA_real_,
+      TRUE ~ pernoctes),
+      viajeros = case_when(
+      indice_tiempo %in% c(as.Date("2020-04-01"), as.Date("2020-05-01")) & anio == 2021 ~ NA_real_,
+      TRUE ~ viajeros))
+
+
+### GRÁFICO 1 - Evolución de pernoctaciones
+datos_grafico1 <- eoh %>%
+  filter(year(indice_tiempo) >= 2018) %>% 
+  mutate(pernoctes = round(pernoctes/1000000, 1)) %>% 
+   mutate(pernoctes = case_when(
+      indice_tiempo %in% c(as.Date("2020-04-01"), as.Date("2020-05-01")) & anio == 2021 ~ 0,
+      TRUE ~ pernoctes))
+         
+grafico1 <- datos_grafico1 %>%
+  ggplot(aes(indice_tiempo, pernoctes,
+             group = origen,
+             colour = origen))  +
+  geom_hline(
+    yintercept = 0,
+    color = "grey",
+    alpha = 0.7,
+    size = 0.5
+  ) +
+  geom_line(size = 1.2, alpha = 0.8) +
+  geom_point(size = 2.5, alpha = 0.8, aes(
+    text = paste(
+      'fecha: ',
+      "",
+      format(indice_tiempo, "%b-%y")
+      ,
+      '\npernoctaciones: ',
+      format(round(pernoctes, 2), decimal.mark = ","),
+      ' m',
+      'origen:' ,
+      origen
+    )
+  )) +
+  scale_color_manual(values = c(cols_arg2[1], cols_arg2[6])) +
+  scale_x_date(
+    date_breaks = "1 months",
+    date_labels = "%b %y",
+    expand = c(0, 10)
+  ) +
+  scale_y_continuous(
+    breaks = seq(
+      min(datos_grafico1$pernoctes, na.rm = T),
+      max(datos_grafico1$pernoctes, na.rm = T),
+      by = 0.5
+    ),
+    labels = scales::number_format(
+      big.mark = ",",
+      decimal.mark = ",",
+      accuracy = 0.1
+    )
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title  = element_text(size = 12),
+    plot.caption = element_text(size = 8),
+    axis.text.x = element_text(size = 9, angle = 90),
+    axis.text.y = element_text(size = 9),
+    panel.grid.major = element_line(colour = "grey90", size = rel(0.5)),
+    panel.grid.minor = element_blank()
+  ) +
+  labs(
+    title = glue(
+        "Pernoctes en millones de noches.\n enero 2018-{mes} {anio} residentes y no residentes"
+      ),
+    subtitle = "",
+    x = "",
+    y = "",
+    fill = "",
+    caption = "Fuente: Encuesta de Ocupación Hotelera (EOH), INDEC y Dirección Nacional de Mercados y Estadística, Subsecretaría de Desarrollo Estratégico, Ministerio de Turismo y Deportes"
+  )
+
+grafico1
+
+```
+
+
+```{r}
+### TABLA 1
+tabla1 <- eoh %>% select(-observaciones) %>% 
+  filter(month(indice_tiempo) <= month(fecha) & year(indice_tiempo) >= year(fecha)-1) %>%
+  group_by(indice_tiempo) %>% 
+  mutate(pernoctes_total =  sum(pernoctes),
+         viajeros_total =  sum(viajeros)) %>% 
+  ungroup()
+
+#Calculo totales
+totales <- tabla1 %>% select(indice_tiempo, origen, pernoctes_total, viajeros_total) %>% 
+  mutate(origen = "Total") %>% 
+  distinct() %>% 
+  rename(pernoctes = pernoctes_total, viajeros = viajeros_total)
+
+#Junto tablas y calculo variaciones y acumulados
+tabla1_A <- tabla1 %>% 
+  select(-c(pernoctes_total, viajeros_total)) %>% 
+  rbind(totales) %>% 
+  mutate(pernoctes  = pernoctes,
+         viajeros  = viajeros,
+         estadia = pernoctes / viajeros) %>%
+  mutate(mes = month(indice_tiempo),
+         anio = year(indice_tiempo)) %>% 
+  group_by(origen, mes) %>% 
+  mutate(var_ia_pernoctes  = round(pernoctes / lag(pernoctes, n = 1) -1, 5),
+         var_ia_viajeros  = round(viajeros / lag(viajeros, n = 1) -1, 5),
+         var_ia_estadia  = round(estadia / lag(estadia, n = 1) -1, 5)) %>%
+  ungroup() %>% 
+  group_by(anio, origen) %>% 
+  mutate(acum_pernoctes = sum(pernoctes, na.rm = T),
+         acum_viajeros = sum(viajeros, na.rm = T),
+         acum_estadia = round(acum_pernoctes/acum_viajeros, 3)) %>%
+  ungroup() %>% 
+  filter(mes == month(fecha)) %>%
+  group_by(origen) %>% 
+  mutate(var_ia_acum_pernoctes = round(acum_pernoctes/lag(acum_pernoctes, n = 1) -1, 5),
+         var_ia_acum_viajeros = round(acum_viajeros/lag(acum_viajeros, n = 1) -1, 5),
+         var_ia_acum_estadia = round(acum_estadia/lag(acum_estadia, n = 1) -1, 5)) %>%
+  ungroup() %>% 
+  filter(year(indice_tiempo) == year(fecha)) %>%
+  mutate(indice_tiempo = str_to_title(format(indice_tiempo, "%b %y"), locale = "es")) 
+
+#Selecciono acumulados 
+acumulados <- tabla1_A %>% select(1,2, 11:16) %>%
+  mutate(indice_tiempo = "Acum. 2023") %>% 
+  rename(pernoctes = acum_pernoctes,
+         var_ia_pernoctes = var_ia_acum_pernoctes,
+         viajeros = acum_viajeros,
+         var_ia_viajeros = var_ia_acum_viajeros,
+         estadia = acum_estadia,
+         var_ia_estadia = var_ia_acum_estadia)
+
+#Junto tablas para graficar
+tablafinal_ficha <- tabla1_A %>% select(indice_tiempo, origen, pernoctes, var_ia_pernoctes,
+                            viajeros, var_ia_viajeros,
+                            estadia, var_ia_estadia) %>%  rbind(acumulados) %>% 
+  mutate(pernoctes = pernoctes/1000000,
+         viajeros = viajeros/1000000)
+
+```
+
+
+### Pernoctaciones, viajeros y estadía
+
+```{r}
+tabla1_ficha <- tablafinal_ficha %>%
+  arrange(desc(origen)) %>% gt(groupname_col = "origen") %>% 
+  cols_label(
+    origen = md("**Origen de los viajeros**"),
+    indice_tiempo = md("**Período**"),
+    pernoctes = md("Millones de noches"),
+    var_ia_pernoctes = md("Var % i.a."),
+    viajeros  = md("Millones de viajeros") ,
+    var_ia_viajeros  = md("Var % i.a."),
+    estadia    = md("Noches"),
+    var_ia_estadia    = md("Var % i.a.")
+  ) %>% 
+  fmt_number(columns = c(3,5,7), decimals = 1, sep_mark = ".", dec_mark = ",") %>% 
+  fmt_percent(columns = c(4,6,8), decimals = 0, sep_mark = ".", dec_mark = ",") %>% 
+  cols_align(
+    align = "center",
+    columns = vars(pernoctes, var_ia_pernoctes,
+                   viajeros, var_ia_viajeros,
+                   estadia, var_ia_estadia))  %>% 
+  tab_header(title = md(glue("**Según origen de los viajeros. {mes} {anio}**"))) %>% 
+  tab_source_note(
+    source_note = md(
+      "**Fuente**: Encuesta de Ocupación Hotelera (EOH) INDEC y Dirección Nacional de Mercados y Estadística, Subsecretaría de Desarrollo Estratégico, Ministerio de Turismo y Deportes")
+  ) %>%  
+ ## AGRUPAMIENTO DE COLUMNAS POR VARIABLE DE INTERES
+  tab_spanner(
+    label = md("**PERNOCTACIONES**"),
+    columns = vars(pernoctes,
+                   var_ia_pernoctes)) %>%
+  tab_spanner(
+    label = md("**VIAJEROS HOSPEDADOS**"),
+    columns = vars(viajeros,
+                   var_ia_viajeros           
+    )
+  )  %>%
+  tab_spanner(
+    label = md("**ESTADÍA PROMEDIO**"),
+    columns = vars(estadia,
+                   var_ia_estadia           
+    )
+  ) %>% 
+  fmt_missing(
+      columns = 3:8,
+      missing_text = "///"
+    ) 
+
+tabla1_ficha
+
+```
+
+
+
